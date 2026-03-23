@@ -1219,7 +1219,7 @@ td {
 
 <script>
 // ── RAW DATA ─────────────────────────────────────────────────────────────────
-// Última actualización: 23 Mar 2026 18:00 · 236 oportunidades
+// Última actualización: 23 Mar 2026 18:01 · 236 oportunidades
 const RAW_DATA = [
 {"pipeline":"Mid-Term Pipeline","propietario":"Antonia Vial","oportunidad":"Agrícola El Roble - Oportunidad 1 Regulado","mwp":0.1991,"prob":70,"mwp_adj":0.1394,"tipo":"Regulado","etapa":"En Negociación","etapa_prop":"","estado":"Propuesta en RM","fecha_down":"07/10/2026","fecha_up":"01/08/2025","fecha_mod":"10/03/2026","fecha_primera_prop":"15/05/2025","fecha_creacion_opp":"17/06/2025","fecha_creacion_cuenta":"13/06/2025","cuenta":"Agrícola El Roble","capex":null,"irr":null,"monto":null},
 {"pipeline":"Mid-Term Pipeline","propietario":"Alfonso Salazar","oportunidad":"SMU - Oportunidad 1 Libre  CD LO Aguirre","mwp":1.263,"prob":10,"mwp_adj":0.1263,"tipo":"Libre","etapa":"En Negociación","etapa_prop":"","estado":"Propuesta en RM","fecha_down":"30/09/2025","fecha_up":"30/10/2025","fecha_mod":"24/07/2025","fecha_primera_prop":"15/05/2024","fecha_creacion_opp":"17/06/2025","fecha_creacion_cuenta":"13/06/2025","cuenta":"SMU","capex":null,"irr":null,"monto":null},
@@ -2096,7 +2096,7 @@ let charts = {};
 document.addEventListener('DOMContentLoaded', () => {
   // Set update time
   const now = new Date();
-  document.getElementById('updateTime').textContent = '23 Mar 2026 18:00';
+  document.getElementById('updateTime').textContent = '23 Mar 2026 18:01';
 
   // Populate RM filter
   const rms = [...new Set(RAW_DATA.map(d => d.propietario))].sort();
