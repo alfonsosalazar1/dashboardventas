@@ -1218,7 +1218,7 @@ td {
 
 <script>
 // ── RAW DATA ─────────────────────────────────────────────────────────────────
-// Última actualización: 23 Mar 2026 17:49 · 236 oportunidades
+// Última actualización: 23 Mar 2026 17:50 · 236 oportunidades
 const RAW_DATA = [
 {"pipeline":"Mid-Term Pipeline","propietario":"Antonia Vial","oportunidad":"Agrícola El Roble - Oportunidad 1 Regulado","mwp":0.1991,"prob":70,"mwp_adj":0.1394,"tipo":"Regulado","etapa":"En Negociación","etapa_prop":"","estado":"Propuesta en RM","fecha_down":"07/10/2026","fecha_up":"01/08/2025","fecha_mod":"10/03/2026","fecha_primera_prop":"15/05/2025","fecha_creacion_opp":"17/06/2025","fecha_creacion_cuenta":"13/06/2025","cuenta":"Agrícola El Roble","capex":null,"irr":null,"monto":null},
 {"pipeline":"Mid-Term Pipeline","propietario":"Alfonso Salazar","oportunidad":"SMU - Oportunidad 1 Libre  CD LO Aguirre","mwp":1.263,"prob":10,"mwp_adj":0.1263,"tipo":"Libre","etapa":"En Negociación","etapa_prop":"","estado":"Propuesta en RM","fecha_down":"30/09/2025","fecha_up":"30/10/2025","fecha_mod":"24/07/2025","fecha_primera_prop":"15/05/2024","fecha_creacion_opp":"17/06/2025","fecha_creacion_cuenta":"13/06/2025","cuenta":"SMU","capex":null,"irr":null,"monto":null},
@@ -2095,7 +2095,7 @@ let charts = {};
 document.addEventListener('DOMContentLoaded', () => {
   // Set update time
   const now = new Date();
-  document.getElementById('updateTime').textContent = '23 Mar 2026 17:49';
+  document.getElementById('updateTime').textContent = '23 Mar 2026 17:50';
 
   // Populate RM filter
   const rms = [...new Set(RAW_DATA.map(d => d.propietario))].sort();
@@ -2124,6 +2124,17 @@ function applyFilters() {
     if (search && !d.oportunidad.toLowerCase().includes(search) &&
         !d.propietario.toLowerCase().includes(search)) return false;
     return true;
+  });
+
+  // Filtro: "última propuesta presentada" < 18 meses desde hoy
+  const _cutoff18 = new Date();
+  _cutoff18.setMonth(_cutoff18.getMonth() - 18);
+  filteredData = filteredData.filter(d => {
+    if (!d.fecha_primera_prop) return true; // sin fecha → mantener
+    const p = d.fecha_primera_prop.split('/');
+    if (p.length < 3) return true;
+    const dt = new Date(parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0]));
+    return dt >= _cutoff18;
   });
 
   // Sort
@@ -2796,13 +2807,9 @@ function showPipelineReport() {
     { key:'Sin Estatus',        label:'Sin Estatus',           color:'#888888' },
   ];
 
-  // Sort rows by fecha_down (ascending)
-  function sortByDate(rows) {
-    return [...rows].sort((a,b) => {
-      const da = (a.fecha_down||'31/12/2099').split('/').reverse().join('');
-      const db = (b.fecha_down||'31/12/2099').split('/').reverse().join('');
-      return da.localeCompare(db);
-    });
+  // Sort rows by mwp_adj descending (potencia ajustada por probabilidad)
+  function sortByMwpAdj(rows) {
+    return [...rows].sort((a,b) => b.mwp_adj - a.mwp_adj);
   }
 
   let grandMwp = 0, grandAdj = 0, grandOpps = 0;
