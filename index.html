@@ -1230,7 +1230,7 @@ td {
 
 <script>
 // ── RAW DATA ─────────────────────────────────────────────────────────────────
-// Última actualización: 23 Mar 2026 20:33 · 236 oportunidades
+// Última actualización: 23 Mar 2026 20:34 · 236 oportunidades
 const RAW_DATA = [
 {"pipeline":"Mid-Term Pipeline","propietario":"Antonia Vial","oportunidad":"Agrícola El Roble - Oportunidad 1 Regulado","mwp":0.1991,"prob":70,"mwp_adj":0.1394,"tipo":"Regulado","etapa":"En Negociación","etapa_prop":"","estado":"Propuesta en RM","fecha_down":"07/10/2026","fecha_up":"01/08/2025","fecha_mod":"10/03/2026","fecha_primera_prop":"15/05/2025","fecha_creacion_opp":"17/06/2025","fecha_creacion_cuenta":"13/06/2025","cuenta":"Agrícola El Roble","capex":null,"irr":null,"monto":null},
 {"pipeline":"Mid-Term Pipeline","propietario":"Antonia Vial","oportunidad":"Tecnologías Cobra - Oportunidad 1 Regulado","mwp":0.2859,"prob":10,"mwp_adj":0.0286,"tipo":"Regulado","etapa":"En Negociación","etapa_prop":"","estado":"Propuesta en RM","fecha_down":"30/09/2025","fecha_up":"30/10/2025","fecha_mod":"16/03/2026","fecha_primera_prop":"07/11/2023","fecha_creacion_opp":"17/06/2025","fecha_creacion_cuenta":"13/06/2025","cuenta":"Tecnologías Cobra","capex":null,"irr":null,"monto":null},
@@ -1474,7 +1474,7 @@ const RAW_DATA = [
 // ── BUDGET DATA (from slide 4 — PPA Signed Accum. MWp 2026) ──────────────────
 const BUDGET_2026 = [0.2, 0.2, 3.0, 4.2, 7.4, 13.3, 16.4, 18.5, 19.1, 23.1, 31.6, 41.4];
 const CURRENT_MONTH = new Date().getMonth() + 1; // dynamic: current month (1-12)
-const PPT_LAST_UPDATE = '23 Mar 2026 20:33'; // ← inyectado por actualizar_dashboard.py
+const PPT_LAST_UPDATE = '23 Mar 2026 20:34'; // ← inyectado por actualizar_dashboard.py
 
 // ── SIGNED DATA ─────────────────────────────────────────────────────────────
 // Oportunidades Cerrada Ganada 2026 · 3 deals
@@ -2108,7 +2108,7 @@ let charts = {};
 document.addEventListener('DOMContentLoaded', () => {
   // Set update time
   const now = new Date();
-  document.getElementById('updateTime').textContent = '23 Mar 2026 20:33';
+  document.getElementById('updateTime').textContent = '23 Mar 2026 20:34';
 
   // Populate RM filter
   const rms = [...new Set(RAW_DATA.map(d => d.propietario))].sort();
