@@ -978,6 +978,7 @@ td {
           <span style="width:18px;height:2px;background:#16a34a;display:inline-block;border-radius:2px"></span> Signed
         </span>
         <div id="budgetKpiPill" style="background:#EDEDED;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;color:#262626;"></div>
+        <button onclick="exportFirmasAsPPT()" style="background:#1E2A3A;color:#F5C713;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⬇ PPT</button>
       </div>
     </div>
     <div style="position:relative;height:280px;">
@@ -1218,7 +1219,7 @@ td {
 
 <script>
 // ── RAW DATA ─────────────────────────────────────────────────────────────────
-// Última actualización: 23 Mar 2026 17:57 · 236 oportunidades
+// Última actualización: 23 Mar 2026 17:58 · 236 oportunidades
 const RAW_DATA = [
 {"pipeline":"Mid-Term Pipeline","propietario":"Antonia Vial","oportunidad":"Agrícola El Roble - Oportunidad 1 Regulado","mwp":0.1991,"prob":70,"mwp_adj":0.1394,"tipo":"Regulado","etapa":"En Negociación","etapa_prop":"","estado":"Propuesta en RM","fecha_down":"07/10/2026","fecha_up":"01/08/2025","fecha_mod":"10/03/2026","fecha_primera_prop":"15/05/2025","fecha_creacion_opp":"17/06/2025","fecha_creacion_cuenta":"13/06/2025","cuenta":"Agrícola El Roble","capex":null,"irr":null,"monto":null},
 {"pipeline":"Mid-Term Pipeline","propietario":"Alfonso Salazar","oportunidad":"SMU - Oportunidad 1 Libre  CD LO Aguirre","mwp":1.263,"prob":10,"mwp_adj":0.1263,"tipo":"Libre","etapa":"En Negociación","etapa_prop":"","estado":"Propuesta en RM","fecha_down":"30/09/2025","fecha_up":"30/10/2025","fecha_mod":"24/07/2025","fecha_primera_prop":"15/05/2024","fecha_creacion_opp":"17/06/2025","fecha_creacion_cuenta":"13/06/2025","cuenta":"SMU","capex":null,"irr":null,"monto":null},
@@ -2095,7 +2096,7 @@ let charts = {};
 document.addEventListener('DOMContentLoaded', () => {
   // Set update time
   const now = new Date();
-  document.getElementById('updateTime').textContent = '23 Mar 2026 17:57';
+  document.getElementById('updateTime').textContent = '23 Mar 2026 17:58';
 
   // Populate RM filter
   const rms = [...new Set(RAW_DATA.map(d => d.propietario))].sort();
@@ -2828,7 +2829,7 @@ function showPipelineReport() {
   }
 
   CAT_DEF.forEach(cat => {
-    const rows = sortByDate(filteredData.filter(d => d.pipeline === cat.key));
+    const rows = sortByMwpAdj(filteredData.filter(d => d.pipeline === cat.key));
     if (rows.length === 0) return;
     const catMwp = rows.reduce((s,d)=>s+d.mwp, 0);
     const catAdj = rows.reduce((s,d)=>s+d.mwp_adj, 0);
@@ -2843,20 +2844,35 @@ function showPipelineReport() {
         </td>
       </tr>`;
 
-    rows.forEach(d => {
-      const esc = d.oportunidad.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    if (cat.key === 'Mid-Term Pipeline') {
+      // Mid-term: solo fila agregada (formato Brookfield slide 6)
       tableRows += `
-        <tr class="rpt-row" onclick="showOppModal(filteredData.find(x=>x.oportunidad==='${esc}'))">
-          <td style="color:#888;font-size:11px;white-space:nowrap">${monthStr(d.fecha_down)}</td>
-          <td style="color:#888;font-size:11px;white-space:nowrap">${monthStr(d.fecha_up)}</td>
-          <td style="color:#555;font-size:11px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.estado||'—'}</td>
-          <td style="max-width:280px;"><strong style="color:#1E2A3A">${d.oportunidad}</strong></td>
-          <td style="color:#888;font-size:11px;white-space:nowrap">${(d.propietario||'—').split(' ').slice(0,2).join(' ')}</td>
-          <td class="rnum"><strong>${d.mwp.toFixed(2)}</strong></td>
-          <td class="rnum" style="color:#888">${d.prob}%</td>
-          <td class="rnum">${d.mwp_adj.toFixed(2)}</td>
+        <tr class="rpt-row">
+          <td style="color:#888;font-size:11px;text-align:center">—</td>
+          <td style="color:#888;font-size:11px;text-align:center">—</td>
+          <td style="color:#555;font-size:11px">Varios</td>
+          <td style="max-width:280px;"><strong style="color:#1E2A3A">Other Projects (${rows.length})</strong></td>
+          <td style="color:#888;font-size:11px;white-space:nowrap">—</td>
+          <td class="rnum"><strong>${catMwp.toFixed(2)}</strong></td>
+          <td class="rnum" style="color:#888">${catProb}</td>
+          <td class="rnum">${catAdj.toFixed(2)}</td>
         </tr>`;
-    });
+    } else {
+      rows.forEach(d => {
+        const esc = d.oportunidad.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        tableRows += `
+          <tr class="rpt-row" onclick="showOppModal(filteredData.find(x=>x.oportunidad==='${esc}'))">
+            <td style="color:#888;font-size:11px;white-space:nowrap">${monthStr(d.fecha_down)}</td>
+            <td style="color:#888;font-size:11px;white-space:nowrap">${monthStr(d.fecha_up)}</td>
+            <td style="color:#555;font-size:11px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.estado||'—'}</td>
+            <td style="max-width:280px;"><strong style="color:#1E2A3A">${d.oportunidad}</strong></td>
+            <td style="color:#888;font-size:11px;white-space:nowrap">${(d.propietario||'—').split(' ').slice(0,2).join(' ')}</td>
+            <td class="rnum"><strong>${d.mwp.toFixed(2)}</strong></td>
+            <td class="rnum" style="color:#888">${d.prob}%</td>
+            <td class="rnum">${d.mwp_adj.toFixed(2)}</td>
+          </tr>`;
+      });
+    }
 
     tableRows += `
       <tr class="rpt-subtotal">
@@ -2908,7 +2924,7 @@ function closePipelineReport() {
 // ── KPI DRILL: AWARDED ────────────────────────────────────────────────────────
 function showAwardedDrill() {
   const opps = filteredData.filter(d => d.pipeline === 'Awarded')
-    .sort((a, b) => b.mwp - a.mwp);
+    .sort((a, b) => b.mwp_adj - a.mwp_adj);
 
   const totalMwp = opps.reduce((s,d)=>s+d.mwp,0);
 
@@ -3299,6 +3315,255 @@ function buildActivityChart() {
   });
 }
 
+
+// ── EXPORT PPT: PIPELINE STATUS (Slide 6 style) ──────────────────────────────
+function exportPipelineAsPPT() {
+  const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  function mStr(ds) {
+    if (!ds) return '—';
+    const p = ds.split('/');
+    if (p.length < 2) return '—';
+    return MONTHS[parseInt(p[1])-1] || '—';
+  }
+
+  const signed2026 = (CLOSED_DATA||[]).filter(d =>
+    d.tipo_cierre === 'Cerrada Ganada' && (d.fecha_cierre||'').slice(-4) === '2026'
+  );
+  const signedMwp = signed2026.reduce((s,d)=>s+d.mwp, 0);
+
+  const CAT_PPT = [
+    { key:'Awarded',             label:'Awarded',              color:'F5C713' },
+    { key:'Short-Term Pipeline', label:'Short Term Pipeline',  color:'EA8C23' },
+    { key:'Mid-Term Pipeline',   label:'Mid Term Pipeline',    color:'6B7280' },
+    { key:'Sin Estatus',         label:'Sin Estatus',          color:'AAAAAA' },
+  ];
+
+  const pptx = new PptxGenJS();
+  pptx.layout = 'LAYOUT_WIDE'; // 13.33" x 7.5"
+  const slide = pptx.addSlide();
+  slide.background = { color: 'FFFFFF' };
+
+  // Header bar
+  slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:'100%', h:0.6, fill:{ color:'1E2A3A' } });
+  slide.addText('Pipeline Status · Solarity', {
+    x:0.25, y:0, w:8, h:0.6, fontSize:18, bold:true, color:'FFFFFF', valign:'middle'
+  });
+  const dLabel = new Date().toLocaleDateString('es-CL',{month:'long',year:'numeric'});
+  slide.addText(dLabel, {
+    x:9, y:0, w:4.1, h:0.6, fontSize:11, color:'F5C713', valign:'middle', align:'right'
+  });
+
+  // Column widths: Down | Up | Status | Customer | MWp | Prob% | MWp Adj
+  const colW = [0.7, 0.7, 1.7, 3.8, 0.85, 0.85, 0.85];
+  const HDR = { fill:{ color:'1E2A3A' }, color:'FFFFFF', bold:true, fontSize:8.5, valign:'middle' };
+  const tblRows = [];
+
+  // — header row
+  tblRows.push([
+    { text:'Downside', options:{ ...HDR, align:'center' } },
+    { text:'Upside',   options:{ ...HDR, align:'center' } },
+    { text:'Status',   options:{ ...HDR } },
+    { text:'Customer / Opportunity', options:{ ...HDR } },
+    { text:'MWp',      options:{ ...HDR, align:'right' } },
+    { text:'Closing %',options:{ ...HDR, align:'center' } },
+    { text:'MWp Adj',  options:{ ...HDR, align:'right' } },
+  ]);
+
+  // — MW Signed row
+  if (signedMwp > 0) {
+    const SIG = { fill:{ color:'166534' }, color:'FFFFFF', bold:true, fontSize:8.5, valign:'middle' };
+    tblRows.push([
+      { text:'✓ MW Signed \'26', options:{ ...SIG } },
+      { text:'', options:{ fill:{ color:'166534' } } },
+      { text:'', options:{ fill:{ color:'166534' } } },
+      { text:`${signed2026.length} contratos firmados`, options:{ ...SIG } },
+      { text:signedMwp.toFixed(2), options:{ ...SIG, align:'right' } },
+      { text:'100%', options:{ ...SIG, align:'center' } },
+      { text:signedMwp.toFixed(2), options:{ ...SIG, align:'right' } },
+    ]);
+  }
+
+  let grandMwp = 0, grandAdj = 0;
+
+  CAT_PPT.forEach(cat => {
+    const rows = [...filteredData.filter(d => d.pipeline === cat.key)]
+      .sort((a,b) => b.mwp_adj - a.mwp_adj);
+    if (rows.length === 0) return;
+    const catMwp = rows.reduce((s,d)=>s+d.mwp,0);
+    const catAdj = rows.reduce((s,d)=>s+d.mwp_adj,0);
+    const catProb = catMwp > 0 ? (catAdj/catMwp*100).toFixed(0)+'%' : '—';
+    grandMwp += catMwp; grandAdj += catAdj;
+
+    // Category header
+    const CAT_OPT = { fill:{ color:cat.color }, color:'FFFFFF', bold:true, fontSize:8.5, valign:'middle' };
+    tblRows.push([
+      { text:cat.label, options:{ ...CAT_OPT } },
+      { text:'', options:{ fill:{ color:cat.color } } },
+      { text:'', options:{ fill:{ color:cat.color } } },
+      { text:`${rows.length} oportunidades`, options:{ ...CAT_OPT } },
+      { text:catMwp.toFixed(2), options:{ ...CAT_OPT, align:'right' } },
+      { text:catProb, options:{ ...CAT_OPT, align:'center' } },
+      { text:catAdj.toFixed(2), options:{ ...CAT_OPT, align:'right' } },
+    ]);
+
+    const ROW = { fill:{ color:'FFFFFF' }, color:'262626', fontSize:8, valign:'middle' };
+    if (cat.key === 'Mid-Term Pipeline') {
+      // Aggregate only
+      tblRows.push([
+        { text:'—', options:{ ...ROW, color:'888888', align:'center' } },
+        { text:'—', options:{ ...ROW, color:'888888', align:'center' } },
+        { text:'Varios', options:{ ...ROW, color:'888888' } },
+        { text:`Other Projects (${rows.length})`, options:{ ...ROW, bold:true } },
+        { text:catMwp.toFixed(2), options:{ ...ROW, bold:true, align:'right' } },
+        { text:catProb, options:{ ...ROW, color:'888888', align:'center' } },
+        { text:catAdj.toFixed(2), options:{ ...ROW, align:'right' } },
+      ]);
+    } else {
+      rows.forEach(d => {
+        tblRows.push([
+          { text:mStr(d.fecha_down), options:{ ...ROW, color:'888888', align:'center' } },
+          { text:mStr(d.fecha_up),   options:{ ...ROW, color:'888888', align:'center' } },
+          { text:(d.estado||'—'), options:{ ...ROW, color:'555555' } },
+          { text:d.oportunidad, options:{ ...ROW, bold:true } },
+          { text:d.mwp.toFixed(2), options:{ ...ROW, bold:true, align:'right' } },
+          { text:d.prob+'%', options:{ ...ROW, color:'888888', align:'center' } },
+          { text:d.mwp_adj.toFixed(2), options:{ ...ROW, align:'right' } },
+        ]);
+      });
+    }
+
+    // Subtotal
+    const SUB = { fill:{ color:'F5F7FA' }, color:'262626', bold:true, fontSize:8, valign:'middle' };
+    tblRows.push([
+      { text:'Total '+cat.label, options:{ ...SUB, align:'right' } },
+      { text:'', options:{ fill:{ color:'F5F7FA' } } },
+      { text:'', options:{ fill:{ color:'F5F7FA' } } },
+      { text:'', options:{ fill:{ color:'F5F7FA' } } },
+      { text:catMwp.toFixed(2), options:{ ...SUB, align:'right' } },
+      { text:catProb, options:{ ...SUB, color:'555555', align:'center' } },
+      { text:catAdj.toFixed(2), options:{ ...SUB, align:'right' } },
+    ]);
+  });
+
+  // Grand total
+  const grandProb = grandMwp > 0 ? (grandAdj/grandMwp*100).toFixed(1)+'%' : '—';
+  const TOT = { fill:{ color:'1E2A3A' }, color:'FFFFFF', bold:true, fontSize:9, valign:'middle' };
+  tblRows.push([
+    { text:'TOTAL PIPELINE', options:{ ...TOT } },
+    { text:'', options:{ fill:{ color:'1E2A3A' } } },
+    { text:'', options:{ fill:{ color:'1E2A3A' } } },
+    { text:'', options:{ fill:{ color:'1E2A3A' } } },
+    { text:grandMwp.toFixed(2), options:{ ...TOT, align:'right' } },
+    { text:grandProb, options:{ ...TOT, align:'center' } },
+    { text:grandAdj.toFixed(2), options:{ ...TOT, align:'right' } },
+  ]);
+
+  slide.addTable(tblRows, {
+    x:0.18, y:0.7, w:12.97,
+    colW: colW,
+    rowH: 0.26,
+    border: { type:'solid', pt:0.5, color:'EDEDED' },
+    autoPage: true,
+    autoPageRepeatHeader: true,
+    autoPageSlideStartY: 0.7,
+  });
+
+  const today = new Date().toISOString().slice(0,10);
+  pptx.writeFile({ fileName: `Pipeline_Status_${today}.pptx` });
+}
+
+
+// ── EXPORT PPT: PPA SIGNED FORECAST — PRÓXIMOS 3 MESES (Slide 4 style) ───────
+function exportFirmasAsPPT() {
+  const MN = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const cm = CURRENT_MONTH - 1; // 0-indexed current month
+
+  // Window: current month + next 2 (capped at 12)
+  const indices = [cm, cm+1, cm+2].filter(i => i < 12);
+  const labels = indices.map(i => MN[i]);
+
+  // Reconstruct signed cumulative
+  const sigArr = new Array(12).fill(0);
+  const src = (SIGNED_DATA && SIGNED_DATA.length > 0) ? SIGNED_DATA : CLOSED_DATA;
+  src.forEach(d => {
+    if (d.tipo_cierre !== 'Cerrada Ganada') return;
+    const dt = parseDate(d.fecha_cierre);
+    if (dt && dt.getFullYear() === 2026) sigArr[dt.getMonth()] += d.mwp;
+  });
+  let sr = 0;
+  const sigCumul = [];
+  for (let i = 0; i < 12; i++) { sr += sigArr[i]; sigCumul.push(parseFloat(sr.toFixed(2))); }
+  const sigBase = sr;
+
+  // Pipeline upside / downside by month
+  const upM = new Array(12).fill(0), dwM = new Array(12).fill(0);
+  filteredData.forEach(d => {
+    const du = parseDate(d.fecha_up);
+    if (du && du.getFullYear() === 2026) upM[du.getMonth()] += d.mwp;
+    const dd2 = parseDate(d.fecha_down);
+    if (dd2 && dd2.getFullYear() === 2026) dwM[dd2.getMonth()] += d.mwp * (d.prob/100);
+  });
+
+  // Build full cumulative upside / downside arrays
+  let ur = 0, dr = 0;
+  const upCumul = [], dwCumul = [];
+  for (let i = 0; i < 12; i++) {
+    const m = i + 1;
+    if (m < CURRENT_MONTH) {
+      ur = sigCumul[i]; dr = sigCumul[i];
+    } else {
+      if (m === CURRENT_MONTH) { ur = sigBase; dr = sigBase; }
+      ur += upM[i]; dr += dwM[i];
+    }
+    upCumul.push(parseFloat(ur.toFixed(2)));
+    dwCumul.push(parseFloat(dr.toFixed(2)));
+  }
+
+  // Extract only the 3-month window
+  const budgetVals = indices.map(i => BUDGET_2026[i]);
+  const upVals     = indices.map(i => upCumul[i]);
+  const dwVals     = indices.map(i => dwCumul[i]);
+  const sigVals    = indices.map(i => i < CURRENT_MONTH ? sigCumul[i] : sigBase);
+
+  const pptx = new PptxGenJS();
+  pptx.layout = 'LAYOUT_WIDE';
+  const slide = pptx.addSlide();
+  slide.background = { color: 'FFFFFF' };
+
+  // Header bar
+  slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:'100%', h:0.6, fill:{ color:'1E2A3A' } });
+  slide.addText('PPA Signed 2026 · Proyección próximos 3 meses', {
+    x:0.25, y:0, w:10, h:0.6, fontSize:17, bold:true, color:'FFFFFF', valign:'middle'
+  });
+  slide.addText(new Date().toLocaleDateString('es-CL',{month:'long',year:'numeric'}), {
+    x:10.5, y:0, w:2.6, h:0.6, fontSize:11, color:'F5C713', valign:'middle', align:'right'
+  });
+
+  // Chart
+  const chartData = [
+    { name:'Budget',   labels, values:budgetVals },
+    { name:'Upside',   labels, values:upVals },
+    { name:'Downside', labels, values:dwVals },
+    { name:'Signed',   labels, values:sigVals },
+  ];
+  slide.addChart(pptx.ChartType.line, chartData, {
+    x:0.5, y:0.75, w:12.3, h:5.7,
+    chartColors:['9CA3AF','1E2A3A','F5C713','16a34a'],
+    lineSize:2.5,
+    showLegend:true, legendPos:'b', legendFontSize:11,
+    showValue:true, dataLabelFontSize:10, dataLabelFormatCode:'0.00',
+    catAxisLabelFontSize:12, catAxisLabelFontBold:true,
+    valAxisLabelFontSize:10, valAxisLabelFormatCode:'0.0',
+    showTitle:false,
+    catGridLine:{ style:'none' },
+    valGridLine:{ style:'solid', color:'EDEDED', size:1 },
+  });
+
+  const today = new Date().toISOString().slice(0,10);
+  pptx.writeFile({ fileName: `PPA_Signed_Forecast_${today}.pptx` });
+}
+
+
 </script>
 <!-- ── PIPELINE REPORT MODAL ──────────────────────────────────────── -->
 <div id="pipelineReportModal" class="report-backdrop" onclick="if(event.target===this)closePipelineReport()">
@@ -3308,6 +3573,7 @@ function buildActivityChart() {
         <div class="report-head-title">Commercial Update · Pipeline Status</div>
         <div class="report-head-sub" id="reportHeadSub">Pipeline activo</div>
       </div>
+      <button onclick="exportPipelineAsPPT()" style="background:#1E2A3A;color:#F5C713;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;margin-right:8px;">⬇ PPT</button>
       <button class="report-close" onclick="closePipelineReport()">✕ Cerrar</button>
     </div>
     <div class="report-body">
