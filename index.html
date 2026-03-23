@@ -784,6 +784,18 @@ td {
     </div>
   </div>
   <div class="header-right">
+    <a id="pptExportLink" href="./update_comercial_latest.pptx"
+       download="Update_Comercial_Brookfield.pptx"
+       style="text-decoration:none;"
+       title="Descarga el Update Comercial Brookfield actualizado con datos de Salesforce">
+      <button id="pptExportBtn" style="
+        background:#F5C713;color:#1E2A3A;border:none;border-radius:8px;
+        padding:8px 18px;font-size:13px;font-weight:800;cursor:pointer;
+        display:flex;align-items:center;gap:7px;letter-spacing:-0.01em;
+        transition:background 0.15s;white-space:nowrap;">
+        📊 Exportar Update Comercial
+      </button>
+    </a>
     <span class="update-time" id="updateTime"></span>
     <div class="live-badge">
       <div class="live-dot"></div>
@@ -978,7 +990,6 @@ td {
           <span style="width:18px;height:2px;background:#16a34a;display:inline-block;border-radius:2px"></span> Signed
         </span>
         <div id="budgetKpiPill" style="background:#EDEDED;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;color:#262626;"></div>
-        <button onclick="exportFirmasAsPPT()" style="background:#1E2A3A;color:#F5C713;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⬇ PPT</button>
       </div>
     </div>
     <div style="position:relative;height:280px;">
@@ -1219,7 +1230,7 @@ td {
 
 <script>
 // ── RAW DATA ─────────────────────────────────────────────────────────────────
-// Última actualización: 23 Mar 2026 18:21 · 236 oportunidades
+// Última actualización: 23 Mar 2026 18:22 · 236 oportunidades
 const RAW_DATA = [
 {"pipeline":"Mid-Term Pipeline","propietario":"Antonia Vial","oportunidad":"Agrícola El Roble - Oportunidad 1 Regulado","mwp":0.1991,"prob":70,"mwp_adj":0.1394,"tipo":"Regulado","etapa":"En Negociación","etapa_prop":"","estado":"Propuesta en RM","fecha_down":"07/10/2026","fecha_up":"01/08/2025","fecha_mod":"10/03/2026","fecha_primera_prop":"15/05/2025","fecha_creacion_opp":"17/06/2025","fecha_creacion_cuenta":"13/06/2025","cuenta":"Agrícola El Roble","capex":null,"irr":null,"monto":null},
 {"pipeline":"Mid-Term Pipeline","propietario":"Alfonso Salazar","oportunidad":"SMU - Oportunidad 1 Libre  CD LO Aguirre","mwp":1.263,"prob":10,"mwp_adj":0.1263,"tipo":"Libre","etapa":"En Negociación","etapa_prop":"","estado":"Propuesta en RM","fecha_down":"30/09/2025","fecha_up":"30/10/2025","fecha_mod":"24/07/2025","fecha_primera_prop":"15/05/2024","fecha_creacion_opp":"17/06/2025","fecha_creacion_cuenta":"13/06/2025","cuenta":"SMU","capex":null,"irr":null,"monto":null},
@@ -1463,6 +1474,7 @@ const RAW_DATA = [
 // ── BUDGET DATA (from slide 4 — PPA Signed Accum. MWp 2026) ──────────────────
 const BUDGET_2026 = [0.2, 0.2, 3.0, 4.2, 7.4, 13.3, 16.4, 18.5, 19.1, 23.1, 31.6, 41.4];
 const CURRENT_MONTH = new Date().getMonth() + 1; // dynamic: current month (1-12)
+const PPT_LAST_UPDATE = "—"; // ← inyectado por actualizar_dashboard.py
 
 // ── SIGNED DATA ─────────────────────────────────────────────────────────────
 // Oportunidades Cerrada Ganada 2026 · 3 deals
@@ -2096,7 +2108,7 @@ let charts = {};
 document.addEventListener('DOMContentLoaded', () => {
   // Set update time
   const now = new Date();
-  document.getElementById('updateTime').textContent = '23 Mar 2026 18:21';
+  document.getElementById('updateTime').textContent = '23 Mar 2026 18:22';
 
   // Populate RM filter
   const rms = [...new Set(RAW_DATA.map(d => d.propietario))].sort();
@@ -3316,7 +3328,28 @@ function buildActivityChart() {
 }
 
 
-// ── EXPORT PPT: PIPELINE STATUS (Slide 6 style) ──────────────────────────────
+// ── UPDATE COMERCIAL — inicializar botón con fecha de última generación ───────
+(function initPptButton() {
+  document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('pptExportBtn');
+    if (!btn) return;
+    if (PPT_LAST_UPDATE && PPT_LAST_UPDATE !== '—') {
+      btn.title = 'Última generación: ' + PPT_LAST_UPDATE;
+      btn.style.opacity = '1';
+    } else {
+      // Aún no se ha generado el PPT → deshabilitar visualmente
+      const link = document.getElementById('pptExportLink');
+      if (link) link.removeAttribute('href');
+      btn.style.background = '#CCCCCC';
+      btn.style.color = '#888888';
+      btn.style.cursor = 'default';
+      btn.title = 'Ejecuta "ACTUALIZAR DASHBOARD.bat" para generar el PPT';
+    }
+  });
+})();
+
+
+// ── EXPORT PPT: PIPELINE STATUS (Slide 6 style) — OBSOLETO (ver actualizar_dashboard.py) ──
 function exportPipelineAsPPT() {
   const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   function mStr(ds) {
@@ -3573,7 +3606,6 @@ function exportFirmasAsPPT() {
         <div class="report-head-title">Commercial Update · Pipeline Status</div>
         <div class="report-head-sub" id="reportHeadSub">Pipeline activo</div>
       </div>
-      <button onclick="exportPipelineAsPPT()" style="background:#1E2A3A;color:#F5C713;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;margin-right:8px;">⬇ PPT</button>
       <button class="report-close" onclick="closePipelineReport()">✕ Cerrar</button>
     </div>
     <div class="report-body">
